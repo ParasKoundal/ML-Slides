@@ -1,0 +1,139 @@
+/* Lecture 2 deck. One dark "cinema" look, used on purpose for projection.
+   Colour carries meaning everywhere: amber = measured data, cyan = the model,
+   pink = error / loss, violet = gradients, green = success.                 */
+:root {
+  color-scheme: dark;
+  --bg: #07090d;
+  --panel: #0f141c;
+  --panel-2: #141b26;
+  --fg: #e9eef5;
+  --dim: #8792a3;
+  --faint: #2a3240;
+  --data: #ffb547;
+  --model: #3fd0ff;
+  --loss: #ff4d7d;
+  --grad: #b48cff;
+  --good: #5ef0a5;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); overflow: hidden;
+  font-family: var(--body);
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+#viewport { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); }
+#stage {
+  position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+  transform-origin: 0 0; overflow: hidden; background: var(--bg);
+}
+#cv { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+#layer { position: absolute; inset: 0; pointer-events: none; }
+#layer.leaving { opacity: 0; }
+#layer .ui, #layer button, #layer input, #layer label, #layer .hit { pointer-events: auto; }
+
+/* ---------- type ---------- */
+.eyebrow { font: 500 24px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+.h1 { font: 800 112px/1.02 var(--display); letter-spacing: -.02em; text-wrap: balance; }
+.h2 { font: 700 68px/1.08 var(--display); letter-spacing: -.01em; text-wrap: balance; }
+.h3 { font: 600 44px/1.15 var(--display); text-wrap: balance; }
+.lede { font: 400 36px/1.4 var(--body); color: var(--dim); max-width: 1100px; text-wrap: pretty; }
+.big { font: 400 40px/1.35 var(--body); }
+.cap { font: 500 30px/1.35 var(--body); color: var(--fg); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.num { font: 600 140px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.lbl { font: 500 22px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.c-data { color: var(--data); } .c-model { color: var(--model); } .c-loss { color: var(--loss); }
+.c-grad { color: var(--grad); } .c-good { color: var(--good); } .c-dim { color: var(--dim); }
+.abs { position: absolute; }
+
+/* subtitle strip: the one sentence the viewer should leave with */
+.sub-wrap { position: absolute; left: 0; right: 0; bottom: 74px; text-align: center; }
+.sub {
+  display: inline-block; max-width: 1700px;
+  font: 500 32px/1.3 var(--body); color: var(--fg); white-space: nowrap;
+  padding: 12px 26px; background: rgba(7, 9, 13, .78); border-radius: 6px;
+}
+.sub b { color: var(--data); font-weight: 600; }
+
+/* ---------- beat reveal: hidden until the engine (core.js) animates them in, frame by frame ---------- */
+[data-b] { opacity: 0; }
+.words .kw { display: inline-block; }
+
+/* ---------- math ---------- */
+.m { display: inline-block; color: var(--fg); }
+.m svg { overflow: visible; vertical-align: middle; }
+.eq { font-size: 54px; }
+.eq-s { font-size: 40px; }
+.eq-xs { font-size: 32px; }
+.tex-fallback { font-family: var(--mono); font-size: .6em; color: var(--dim); }
+.m .hl-data { fill: var(--data); stroke: var(--data); }
+.m [class*="mjx"] { transition: fill .4s, opacity .4s; }
+
+/* ---------- panels and cards ---------- */
+.card { background: var(--panel); border: 1px solid var(--faint); border-radius: 14px; padding: 28px 32px; }
+.card h4 { margin: 0 0 10px; font: 600 26px/1.2 var(--body); }
+.card p { margin: 0; font: 400 26px/1.4 var(--body); color: var(--dim); }
+.pill { display: inline-block; padding: 6px 16px; border-radius: 99px; font: 500 22px/1.2 var(--mono); background: var(--panel-2); color: var(--dim); }
+.table { border-collapse: collapse; font: 400 28px/1.3 var(--body); font-variant-numeric: tabular-nums; }
+.table th { font: 500 20px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); text-align: left; padding: 0 34px 14px 0; border-bottom: 1px solid var(--faint); }
+.table td { padding: 14px 34px 14px 0; border-bottom: 1px solid #161c26; }
+.table td.mono { font-family: var(--mono); }
+
+/* pause-and-think card */
+.think { position: absolute; width: 760px; padding: 34px 40px; border-radius: 16px; background: #11161f; border: 2px solid var(--data); box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.think .lbl { color: var(--data); margin-bottom: 14px; }
+.think .q { font: 500 34px/1.35 var(--body); }
+.think .a { margin-top: 18px; font: 400 28px/1.4 var(--body); color: var(--good); }
+
+/* ---------- controls inside scenes ---------- */
+.ctl { display: flex; align-items: center; gap: 18px; font: 500 24px/1 var(--mono); color: var(--dim); }
+.ctl input[type=range] { width: 340px; accent-color: var(--model); height: 30px; }
+.ctl output { color: var(--fg); min-width: 110px; font-variant-numeric: tabular-nums; }
+.btn { font: 600 22px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--bg); background: var(--model); border: 0; border-radius: 8px; padding: 14px 22px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--faint); }
+.btn:focus-visible, .ctl input:focus-visible { outline: 3px solid var(--data); outline-offset: 3px; }
+
+/* code */
+.code { font: 400 25px/1.55 var(--mono); background: #0b0f15; border: 1px solid var(--faint); border-radius: 12px; padding: 26px 32px; white-space: pre; color: #c9d3e0; }
+.code .k { color: var(--grad); } .code .c { color: #5d6878; } .code .n { color: var(--data); } .code .f { color: var(--model); }
+
+/* ---------- chrome: progress bar, overview, notes ---------- */
+#chrome { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; padding: 0 56px; display: flex; flex-direction: column; justify-content: center; gap: 10px; transition: opacity .6s; pointer-events: auto; }
+#chrome.idle { opacity: .35; }
+#chrome .row { display: flex; justify-content: space-between; font: 500 18px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+#chrome .row b { color: var(--fg); font-weight: 500; }
+#track { position: relative; display: flex; gap: 6px; height: 5px; }
+#track .seg { position: relative; height: 5px; background: #1d2430; border-radius: 3px; overflow: hidden; cursor: pointer; }
+#track .seg i { position: absolute; inset: 0 auto 0 0; background: var(--loss); }
+#head { position: absolute; top: -5px; width: 15px; height: 15px; border-radius: 50%; background: var(--loss); box-shadow: 0 0 14px var(--loss); }
+
+#overview { position: fixed; inset: 0; background: rgba(7,9,13,.96); z-index: 20; overflow: auto; padding: 40px max(24px, env(safe-area-inset-right, 0px)) 40px max(24px, env(safe-area-inset-left, 0px)); }
+#overview h2 { font: 700 28px/1.2 var(--display); margin: 0 0 24px; }
+#overview .chap { margin: 0 0 22px; }
+#overview .chap h3 { font: 500 14px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--loss); margin: 0 0 10px; }
+#overview .grid { display: flex; flex-wrap: wrap; gap: 8px; }
+#overview button { font: 400 15px/1.3 var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--faint); border-radius: 8px; padding: 10px 14px; cursor: pointer; text-align: left; }
+#overview button.cur { border-color: var(--model); color: var(--model); }
+#overview .keys { margin-top: 28px; font: 400 14px/1.7 var(--mono); color: var(--dim); }
+
+#notes { position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; z-index: 15; background: rgba(12,16,23,.97); border-top: 1px solid var(--faint); padding: 18px max(28px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px)); font: 400 17px/1.55 var(--body); }
+#notes .top { display: flex; justify-content: space-between; font: 500 13px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+#notes .top b { color: var(--data); font-weight: 500; }
+#notes p { margin: 0 0 8px; max-width: 110ch; }
+#notes p.now { color: var(--fg); } #notes p.later { color: #59647a; }
+
+#hint { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); font: 500 13px/1.4 var(--mono); color: var(--dim); background: rgba(15,20,28,.9); border: 1px solid var(--faint); border-radius: 8px; padding: 10px 14px; z-index: 12; transition: opacity 1s; }
+#hint.gone { opacity: 0; pointer-events: none; }
+
+
+/* ---------- split recording (index.html?rec&split): video gets only the moving graphics; static text becomes native PowerPoint objects */
+.split #layer [data-b]:not(.keep) { visibility: hidden !important; }
+.split #layer .keep { visibility: visible !important; }
+.split #chrome .row { visibility: hidden !important; }
+.mathshot #layer * { visibility: hidden !important; }
+.mathshot #layer .m, .mathshot #layer .m * { visibility: visible !important; }
+.mathshot #chrome { display: none !important; }
